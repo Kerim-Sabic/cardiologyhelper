@@ -622,7 +622,7 @@ const renderCongenitalSim: Scene3D['renderLogic'] = (state) => {
                  <div className="text-right">
                      <div className="text-xs text-slate-400 font-bold uppercase mb-1">Qp/Qs Ratio</div>
                      <div className="text-3xl font-mono font-bold text-green-400">{shuntQpQs.toFixed(1)} : 1</div>
-                     <div className="text-[10px] text-slate-500 mt-1">Normal = 1.0. Surgery if > 1.5</div>
+                     <div className="text-[10px] text-slate-500 mt-1">Normal = 1.0. Surgery if &gt; 1.5</div>
                  </div>
              </div>
         </div>
@@ -948,7 +948,7 @@ export const courseContent: ModuleContent[] = [
     title: "Module 3: ECG Morphology & Axis",
     overview: [
       "Axis: Lead I & aVF. Left (Thumb I Up, aVF Down). Right (I Down, aVF Up).",
-      "Hypertrophy: LVH (S V1 + R V5 > 35mm). RVH (R > S in V1).",
+      "Hypertrophy: LVH (S V1 + R V5 &gt; 35mm). RVH (R &gt; S in V1).",
       "Ischemia: ST Elevation (Injury), ST Depression (Ischemia), Q waves (Infarct).",
       "Blocks: RBBB (rSR' V1). LBBB (Broad R I/V6).",
       "Electrolytes: Hyperkalemia (Peaked T). Hypokalemia (U waves)."
@@ -970,11 +970,11 @@ export const courseContent: ModuleContent[] = [
       <br/><br/>
       <strong>Left Ventricular Hypertrophy (LVH):</strong>
       <br/>- Sokolow-Lyon Criteria: S wave in V1 + R wave in V5/V6 ≥ 35 mm.
-      <br/>- R wave in aVL > 11 mm.
+      <br/>- R wave in aVL &gt; 11 mm.
       <br/>- Strain Pattern: ST depression and T-inversion in lateral leads (I, aVL, V5, V6).
       </p>
 
-      <h3 class="text-2xl font-bold text-slate-900 mb-4">3. Bundle Branch Blocks (QRS > 0.12s)</h3>
+      <h3 class="text-2xl font-bold text-slate-900 mb-4">3. Bundle Branch Blocks (QRS &gt; 0.12s)</h3>
       <p class="mb-4 text-lg">
       <strong>Right (RBBB):</strong> "Rabbit Ears" (rSR') in V1. Slurred S wave in I and V6.
       <br/><strong>Left (LBBB):</strong> Broad, notched, monomorphic R wave in I, aVL, V5, V6. Deep QS in V1. *New LBBB = STEMI equivalent.*
@@ -987,8 +987,8 @@ export const courseContent: ModuleContent[] = [
       <h3>Mean Axis</h3>
       <ul>
         <li><strong>Normal:</strong> -30° to +90°</li>
-        <li><strong>Left-axis deviation (< -30°):</strong> Diffuse left ventricular disease, inferior MI, left anterior hemiblock.</li>
-        <li><strong>Right-axis deviation (> 90°):</strong> Right ventricular hypertrophy (R > S in V1), left posterior hemiblock.</li>
+        <li><strong>Left-axis deviation (&lt; -30°):</strong> Diffuse left ventricular disease, inferior MI, left anterior hemiblock.</li>
+        <li><strong>Right-axis deviation (&gt; 90°):</strong> Right ventricular hypertrophy (R &gt; S in V1), left posterior hemiblock.</li>
       </ul>
 
       <h3>Intervals</h3>
@@ -1001,9 +1001,9 @@ export const courseContent: ModuleContent[] = [
       <h3>Hypertrophy</h3>
       <ul>
         <li><strong>Right atrium:</strong> P wave ≥2.5 mm in lead II.</li>
-        <li><strong>Left atrium:</strong> P biphasic in V1, terminal negative force > 0.04 s.</li>
-        <li><strong>Right ventricle:</strong> R > S in V1 and R in V1 > 5 mm; deep S in V6; right-axis deviation.</li>
-        <li><strong>Left ventricle:</strong> S in V1 + R in V5 or V6 ≥ 35 mm; or R in aVL >11 mm.</li>
+        <li><strong>Left atrium:</strong> P biphasic in V1, terminal negative force &gt; 0.04 s.</li>
+        <li><strong>Right ventricle:</strong> R &gt; S in V1 and R in V1 &gt; 5 mm; deep S in V6; right-axis deviation.</li>
+        <li><strong>Left ventricle:</strong> S in V1 + R in V5 or V6 ≥ 35 mm; or R in aVL &gt;11 mm.</li>
       </ul>
 
       <h3>Infarction</h3>
@@ -1183,7 +1183,7 @@ export const courseContent: ModuleContent[] = [
       <h3>Ventricular Septal Defect (VSD)</h3>
       <ul>
         <li><strong>Exam:</strong> Holosystolic murmur at LSB; Palpable thrill.</li>
-        <li><strong>Treatment:</strong> Closure if symptoms/volume overload or Qp/Qs > 1.5:1.</li>
+        <li><strong>Treatment:</strong> Closure if symptoms/volume overload or Qp/Qs &gt; 1.5:1.</li>
       </ul>
 
       <h3>Patent Ductus Arteriosus (PDA)</h3>
@@ -1256,7 +1256,7 @@ export const courseContent: ModuleContent[] = [
       Calcific (elderly) or Bicuspid (young).
       <br/>- <strong>Symptoms (SAD):</strong> Syncope, Angina, Dyspnea. (Survival: 3, 5, 2 years respectively).
       <br/>- <strong>Exam:</strong> Pulsus parvus et tardus (weak/late). Soft/Absent S2. Late-peaking systolic murmur.
-      <br/>- <strong>Severe Criteria:</strong> Valve Area < 1.0 cm². Mean Gradient > 40 mmHg. Jet Velocity > 4.0 m/s.
+      <br/>- <strong>Severe Criteria:</strong> Valve Area &lt; 1.0 cm². Mean Gradient &gt; 40 mmHg. Jet Velocity &gt; 4.0 m/s.
       </p>
 
       <h3 class="text-2xl font-bold text-slate-900 mb-4">3. Aortic Regurgitation</h3>
@@ -1292,7 +1292,7 @@ export const courseContent: ModuleContent[] = [
       <h3>Aortic Regurgitation (AR)</h3>
       <ul>
         <li><strong>Exam:</strong> Widened pulse pressure, water hammer pulse, Quincke's sign. Decrescendo early diastolic murmur.</li>
-        <li><strong>Treatment:</strong> Surgery if symptomatic or LVEF < 50% or End-systolic diameter > 50mm.</li>
+        <li><strong>Treatment:</strong> Surgery if symptomatic or LVEF &lt; 50% or End-systolic diameter &gt; 50mm.</li>
       </ul>
     `,
     visuals: [],
@@ -1493,11 +1493,11 @@ export const courseContent: ModuleContent[] = [
       <p class="mb-4 text-lg">
       <ul class="list-disc pl-6 space-y-2">
         <li><strong>Renal Parenchymal Dz:</strong> High Cr, Proteinuria. Most common cause.</li>
-        <li><strong>Renovascular (RAS):</strong> Abdominal Bruit. Rise in Cr >30% after ACEi. Recurrent Flash Pulmonary Edema.</li>
-        <li><strong>Primary Aldosteronism (Conn's):</strong> Hypertension + Hypokalemia (spontaneous or diuretic induced). Dx: Plasma Aldosterone/Renin Ratio > 20.</li>
+        <li><strong>Renovascular (RAS):</strong> Abdominal Bruit. Rise in Cr &gt;30% after ACEi. Recurrent Flash Pulmonary Edema.</li>
+        <li><strong>Primary Aldosteronism (Conn's):</strong> Hypertension + Hypokalemia (spontaneous or diuretic induced). Dx: Plasma Aldosterone/Renin Ratio &gt; 20.</li>
         <li><strong>Pheochromocytoma:</strong> 5 P's (Paroxysmal, Pain/HA, Pressure, Palpitations, Perspiration). Dx: Plasma Metanephrines.</li>
         <li><strong>Cushing's:</strong> Moon facies, striae, central obesity.</li>
-        <li><strong>Coarctation:</strong> BP Arms > Legs. Radial-Femoral delay.</li>
+        <li><strong>Coarctation:</strong> BP Arms &gt; Legs. Radial-Femoral delay.</li>
       </ul>
       </p>
 
