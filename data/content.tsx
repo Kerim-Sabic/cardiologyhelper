@@ -400,10 +400,6 @@ const renderECGSim: Scene3D['renderLogic'] = (state) => {
       path += " L12,30";
       
       // QRS Complex
-      // If Amp > 0: small q, tall R, small s
-      // If Amp < 0: small r, deep S
-      // If Amp ~ 0: Equi-phasic
-      
       const rHeight = amp * 25; // Max height 25 units
       
       if (amp > 0.2) {
@@ -451,6 +447,14 @@ const renderECGSim: Scene3D['renderLogic'] = (state) => {
   const x = 50 + 42 * Math.cos(rad(angle));
   const y = 50 + 42 * Math.sin(rad(angle));
 
+  // Legend Data
+  const quadrants = [
+    { name: "Normal Axis", range: "-30° to +90°", color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", active: angle > -30 && angle < 90, description: "Normal physiology." },
+    { name: "Left Axis Deviation", range: "-30° to -90°", color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20", active: angle <= -30 && angle >= -90, description: "LVH, LBBB, Inferior MI, LAFB." },
+    { name: "Right Axis Deviation", range: "+90° to +180°", color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", active: angle >= 90 && angle <= 180, description: "RVH, LPHB, Lateral MI, PE." },
+    { name: "Extreme Axis", range: "-90° to -180°", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", active: angle < -90 || angle > 180, description: "VT, Hyperkalemia, Lead Error." }
+  ];
+
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 rounded-xl border border-slate-700 p-6 shadow-xl">
         <div className="flex flex-col lg:flex-row h-full gap-8">
@@ -459,7 +463,7 @@ const renderECGSim: Scene3D['renderLogic'] = (state) => {
                 <div className={`font-bold mb-6 text-xl text-center px-6 py-2 rounded-full border border-white/10 ${zoneColor}`}>
                     {interp} ({angle}°)
                 </div>
-                <div className="relative w-80 h-80">
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80">
                     <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
                         {/* Background & Zones */}
                         <circle cx="50" cy="50" r="48" fill="#1e293b" stroke="#475569" strokeWidth="1" />
@@ -502,34 +506,41 @@ const renderECGSim: Scene3D['renderLogic'] = (state) => {
                 </div>
             </div>
 
-            {/* Right: Real-time 6-Lead ECG */}
-            <div className="flex-1 bg-slate-800/50 rounded-xl p-6 border border-slate-700/50 backdrop-blur-sm">
-                <h4 className="text-slate-300 text-sm font-bold uppercase mb-6 text-center tracking-widest">Real-time Limb Lead Projection</h4>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-6">
-                    {leads.map(l => {
-                        const amplitude = projection(angle, l.angle);
-                        // Calculate color based on amplitude (Green = Positive, Red = Negative)
-                        const traceColor = amplitude > 0 ? "#22c55e" : (amplitude < 0 ? "#ef4444" : "#94a3b8");
-                        
-                        return (
-                            <div key={l.name} className="relative bg-[#fff0f5] rounded h-20 border border-pink-200/50 shadow-sm overflow-hidden group hover:scale-105 transition-transform duration-200">
-                                {/* ECG Grid Background */}
-                                <div className="absolute inset-0 opacity-20" 
-                                     style={{ backgroundImage: 'linear-gradient(#f472b6 0.5px, transparent 0.5px), linear-gradient(90deg, #f472b6 0.5px, transparent 0.5px)', backgroundSize: '4px 4px' }}></div>
-                                <div className="absolute inset-0 opacity-20" 
-                                     style={{ backgroundImage: 'linear-gradient(#f472b6 1px, transparent 1px), linear-gradient(90deg, #f472b6 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                                
-                                <div className="absolute top-1 left-2 text-[10px] font-bold text-slate-800 bg-white/80 px-1 rounded">{l.name}</div>
-                                
-                                <svg viewBox="0 0 40 60" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                                    <path d={getECGPath(amplitude)} fill="none" stroke="black" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-                                </svg>
-                            </div>
-                        );
-                    })}
+            {/* Right: Real-time 6-Lead ECG & Legend */}
+            <div className="flex-1 flex flex-col gap-4">
+                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 backdrop-blur-sm">
+                    <h4 className="text-slate-300 text-xs font-bold uppercase mb-4 text-center tracking-widest">Real-time Limb Lead Projection</h4>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                        {leads.map(l => {
+                            const amplitude = projection(angle, l.angle);
+                            return (
+                                <div key={l.name} className="relative bg-[#fff0f5] rounded h-16 border border-pink-200/50 shadow-sm overflow-hidden group hover:scale-105 transition-transform duration-200">
+                                    {/* ECG Grid Background */}
+                                    <div className="absolute inset-0 opacity-20" 
+                                         style={{ backgroundImage: 'linear-gradient(#f472b6 0.5px, transparent 0.5px), linear-gradient(90deg, #f472b6 0.5px, transparent 0.5px)', backgroundSize: '4px 4px' }}></div>
+                                    <div className="absolute inset-0 opacity-20" 
+                                         style={{ backgroundImage: 'linear-gradient(#f472b6 1px, transparent 1px), linear-gradient(90deg, #f472b6 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                                    
+                                    <div className="absolute top-1 left-2 text-[10px] font-bold text-slate-800 bg-white/80 px-1 rounded">{l.name}</div>
+                                    
+                                    <svg viewBox="0 0 40 60" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                                        <path d={getECGPath(amplitude)} fill="none" stroke="black" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+                                    </svg>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-                <div className="mt-6 text-center text-xs text-slate-400 italic">
-                    Drag the slider to rotate the heart's electrical axis.
+
+                {/* Interactive Legend */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {quadrants.map((q) => (
+                        <div key={q.name} className={`p-2 rounded border transition-all duration-300 ${q.active ? `${q.bg} ${q.border} shadow-md ring-1 ring-inset ring-white/10` : "bg-slate-800 border-slate-700 opacity-60"}`}>
+                            <div className={`font-bold text-[10px] uppercase ${q.color}`}>{q.name}</div>
+                            <div className="text-[9px] text-slate-400 font-mono">{q.range}</div>
+                            <div className="text-[9px] text-slate-300 mt-0.5 leading-tight">{q.description}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -794,7 +805,13 @@ export const courseContent: ModuleContent[] = [
     ],
     quiz: [
       { id: 1, question: "A patient has a JVP that RISES with inspiration. This is known as:", options: ["Pulsus Paradoxus", "Kussmaul Sign", "Cannon a-wave", "Lancet wave"], correctIndex: 1, explanation: "Kussmaul sign is a paradoxical rise in JVP during inspiration. Normally, inspiration sucks blood into the heart, lowering JVP. In Constrictive Pericarditis or RV Infarction, the RV cannot accept the volume, so it backs up into the neck." },
-      { id: 2, question: "Cannon 'a' waves in the neck are most specific for:", options: ["Atrial Fibrillation", "Tricuspid Regurgitation", "AV Dissociation (Complete Heart Block)", "Tamponade"], correctIndex: 2, explanation: "Cannon a-waves occur when the RA contracts against a closed Tricuspid valve. This requires the atria and ventricles to be beating independently (AV dissociation)." }
+      { id: 2, question: "Cannon 'a' waves in the neck are most specific for:", options: ["Atrial Fibrillation", "Tricuspid Regurgitation", "AV Dissociation (Complete Heart Block)", "Tamponade"], correctIndex: 2, explanation: "Cannon a-waves occur when the RA contracts against a closed Tricuspid valve. This requires the atria and ventricles to be beating independently (AV dissociation)." },
+      { id: 3, question: "Pulsus bisferiens is most commonly associated with:", options: ["Aortic Stenosis", "Hypertrophic Cardiomyopathy", "Mitral Regurgitation", "Mitral Stenosis"], correctIndex: 1, explanation: "Pulsus bisferiens (double peak) occurs in HOCM (spike-and-dome) and mixed Aortic Stenosis/Regurgitation." },
+      { id: 4, question: "A sustained, forceful apical impulse is most indicative of:", options: ["Pressure Overload (LVH)", "Volume Overload (Dilated CM)", "Mitral Stenosis", "Constrictive Pericarditis"], correctIndex: 0, explanation: "A sustained heave indicates the LV is contracting against high pressure (Pressure Overload), typical of concentric LVH or severe AS." },
+      { id: 5, question: "Large 'v' waves in the JVP are pathognomonic for:", options: ["Tricuspid Stenosis", "Tricuspid Regurgitation", "Pulmonic Stenosis", "ASD"], correctIndex: 1, explanation: "Large v waves (Lancet waves) occur when the RV pumps blood backwards into the RA during systole, filling the atrium excessively." },
+      { id: 6, question: "Which condition causes a Pulsus Parvus et Tardus?", options: ["Aortic Regurgitation", "Aortic Stenosis", "Mitral Regurgitation", "Hypertrophic Cardiomyopathy"], correctIndex: 1, explanation: "Fixed obstruction of the aortic valve delays the systolic peak (tardus) and reduces amplitude (parvus)." },
+      { id: 7, question: "The 'x' descent in the JVP corresponds to:", options: ["Atrial contraction", "Atrial relaxation", "Ventricular filling", "Passive atrial filling"], correctIndex: 1, explanation: "The x descent represents atrial relaxation and the downward pull of the tricuspid valve during systole." },
+      { id: 8, question: "Hepatojugular reflux is a sign of:", options: ["Liver Failure", "Right Heart Failure", "Portal Hypertension", "Nephrotic Syndrome"], correctIndex: 1, explanation: "Sustained elevation of JVP >3cm with abdominal compression indicates the RV cannot accommodate increased venous return (Right Heart Failure)." }
     ],
     vignettes: [],
     mnemonics: []
@@ -915,7 +932,13 @@ export const courseContent: ModuleContent[] = [
     ],
     quiz: [
       { id: 1, question: "Which murmur increases in intensity with Valsalva maneuver?", options: ["Aortic Stenosis", "Mitral Regurgitation", "HOCM", "VSD"], correctIndex: 2, explanation: "Valsalva decreases venous return (preload), making the LV smaller. In HOCM, a smaller LV brings the septum and mitral leaflet closer, WORSENING the obstruction and making the murmur LOUDER." },
-      { id: 2, question: "A patient has a fixed split S2. What is the most likely diagnosis?", options: ["LBBB", "Atrial Septal Defect", "Pulmonary Embolism", "Aortic Stenosis"], correctIndex: 1, explanation: "ASD causes L->R shunting, keeping the RV volume overloaded and the Pulmonic valve closure delayed during both inspiration and expiration (Fixed)." }
+      { id: 2, question: "A patient has a fixed split S2. What is the most likely diagnosis?", options: ["LBBB", "Atrial Septal Defect", "Pulmonary Embolism", "Aortic Stenosis"], correctIndex: 1, explanation: "ASD causes L->R shunting, keeping the RV volume overloaded and the Pulmonic valve closure delayed during both inspiration and expiration (Fixed)." },
+      { id: 3, question: "Paradoxical Splitting of S2 is caused by:", options: ["RBBB", "LBBB", "ASD", "Mitral Regurgitation"], correctIndex: 1, explanation: "In LBBB, LV contraction is delayed, so A2 closes AFTER P2. Inspiration delays P2, moving it closer to A2 (narrowing the split)." },
+      { id: 4, question: "Which maneuver would make the murmur of Mitral Regurgitation LOUDER?", options: ["Valsalva", "Standing", "Handgrip", "Amyl Nitrate"], correctIndex: 2, explanation: "Handgrip increases systemic vascular resistance (Afterload). This forces more blood backward through the incompetent mitral valve, increasing the murmur." },
+      { id: 5, question: "An Opening Snap that occurs very close to S2 indicates:", options: ["Mild Mitral Stenosis", "Severe Mitral Stenosis", "Mitral Regurgitation", "Aortic Stenosis"], correctIndex: 1, explanation: "A short S2-OS interval implies very high Left Atrial pressure, which forces the stenotic valve to snap open immediately after aortic closure." },
+      { id: 6, question: "S3 is most commonly associated with:", options: ["Left Ventricular Hypertrophy", "Volume Overload (Systolic Failure)", "Mitral Stenosis", "Aortic Stenosis"], correctIndex: 1, explanation: "S3 (Ventricular Gallop) is caused by rapid early diastolic filling into a dilated ventricle." },
+      { id: 7, question: "Amyl Nitrate inhalation typically causes which murmur to DECREASE?", options: ["Aortic Stenosis", "Mitral Regurgitation", "HOCM", "Pulmonic Stenosis"], correctIndex: 1, explanation: "Amyl Nitrate is a vasodilator (decreases Afterload). Regurgitant murmurs (MR, AR, VSD) decrease because forward flow is favored." },
+      { id: 8, question: "A continuous machinery-like murmur is seen in:", options: ["VSD", "PDA", "Aortic Regurgitation", "Venous Hum"], correctIndex: 1, explanation: "PDA connects the high-pressure Aorta to low-pressure PA, causing continuous flow throughout systole and diastole." }
     ],
     vignettes: [],
     mnemonics: []
@@ -1031,7 +1054,16 @@ export const courseContent: ModuleContent[] = [
         ]
       }
     ],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Left Axis Deviation is defined as an axis between:", options: ["0 and -90", "-30 and -90", "+90 and +180", "-90 and -180"], correctIndex: 1, explanation: "Normal axis is -30 to +90. LAD is -30 to -90. Left Anterior Hemiblock is a common cause." },
+      { id: 2, question: "Which finding is most specific for Right Ventricular Hypertrophy?", options: ["S > R in V1", "R > S in V1", "Deep Q waves in V6", "Left Axis Deviation"], correctIndex: 1, explanation: "Normally V1 is negative (rS). In RVH, the large RV anterior forces make V1 positive (R > S)." },
+      { id: 3, question: "Broad, notched R waves in I, aVL, and V6 with absent Q waves describes:", options: ["RBBB", "LBBB", "LAFB", "Posterior MI"], correctIndex: 1, explanation: "LBBB causes delayed LV activation, producing broad monomorphic R waves in lateral leads and deep QS waves in V1." },
+      { id: 4, question: "Which of the following causes Right Axis Deviation?", options: ["Inferior MI", "Left Anterior Hemiblock", "Left Posterior Hemiblock", "LBBB"], correctIndex: 2, explanation: "LPHB shifts the axis to the right. LAFB shifts it to the left." },
+      { id: 5, question: "Tall, peaked T waves are the earliest sign of:", options: ["Hypokalemia", "Hyperkalemia", "Hypercalcemia", "Hypocalcemia"], correctIndex: 1, explanation: "Hyperkalemia causes peaked T waves. Hypokalemia causes U waves and flat T waves." },
+      { id: 6, question: "U waves are most characteristic of:", options: ["Hyperkalemia", "Hypokalemia", "Hypercalcemia", "Hypocalcemia"], correctIndex: 1, explanation: "Hypokalemia causes ST depression, flat T waves, and prominent U waves." },
+      { id: 7, question: "A Delta Wave (slurred QRS upstroke) indicates:", options: ["LBBB", "Wolff-Parkinson-White", "Hypertrophy", "Ischemia"], correctIndex: 1, explanation: "Pre-excitation of the ventricles via an accessory pathway shortens the PR interval and slurs the QRS upstroke." },
+      { id: 8, question: "ST elevation in leads I, aVL, V5, V6 suggests infarction of:", options: ["Inferior Wall", "Lateral Wall", "Anterior Wall", "Posterior Wall"], correctIndex: 1, explanation: "Lateral leads look at the lateral wall of the LV (Circumflex territory)." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1093,7 +1125,16 @@ export const courseContent: ModuleContent[] = [
         ]
       }
     ],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Which finding on Nuclear Stress Test indicates ischemia?", options: ["Defect at Rest and Stress", "Defect at Stress, Normal at Rest", "Normal at Stress, Defect at Rest", "Dilated LV at rest"], correctIndex: 1, explanation: "A reversible defect (seen only at stress) indicates viable myocardium that is not receiving enough blood flow during demand (Ischemia)." },
+      { id: 2, question: "The preferred stress agent for a patient with LBBB is:", options: ["Dobutamine", "Adenosine", "Exercise Treadmill", "Epinephrine"], correctIndex: 1, explanation: "Exercise and Dobutamine (high heart rates) cause septal motion artifacts in LBBB that mimic ischemia. Vasodilators (Adenosine) are preferred." },
+      { id: 3, question: "TEE is superior to TTE for visualizing:", options: ["LV Ejection Fraction", "Left Atrial Appendage Thrombus", "LV Hypertrophy", "Pericardial Effusion"], correctIndex: 1, explanation: "The LA appendage is posterior structure well visualized from the esophagus (TEE), but poorly seen on TTE." },
+      { id: 4, question: "RV Systolic Pressure is calculated using:", options: ["Mitral Inflow velocity", "Tricuspid Regurgitation velocity", "Aortic jet velocity", "Pulmonic flow"], correctIndex: 1, explanation: "The modified Bernoulli equation (4v^2) applied to the TR jet gives the pressure gradient between RV and RA." },
+      { id: 5, question: "Delayed Gadolinium Enhancement in a subendocardial distribution suggests:", options: ["Ischemic Cardiomyopathy", "Amyloidosis", "Sarcoidosis", "Myocarditis"], correctIndex: 0, explanation: "Ischemia affects the subendocardium first. Non-ischemic causes usually spare the subendocardium or are mid-wall." },
+      { id: 6, question: "Which finding on Stress Echocardiogram indicates ischemia?", options: ["Fixed wall motion abnormality", "New wall motion abnormality at peak stress", "LV hypertrophy", "Dilated LA"], correctIndex: 1, explanation: "Ischemia causes transient wall motion abnormalities that appear during stress and resolve at rest." },
+      { id: 7, question: "Agitated Saline Study (Bubble Study) is used to detect:", options: ["Aortic Stenosis", "Intracardiac Shunt (PFO/ASD)", "Mitral Regurgitation", "LV Thrombus"], correctIndex: 1, explanation: "Bubbles crossing from Right to Left atrium indicate a shunt." },
+      { id: 8, question: "Coronary CT Angiography has high:", options: ["Positive Predictive Value", "Negative Predictive Value", "Radiation dose compared to Cath", "Risk of bleeding"], correctIndex: 1, explanation: "CCTA is excellent for ruling OUT CAD (High NPV). A normal scan effectively excludes significant disease." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1179,7 +1220,16 @@ export const courseContent: ModuleContent[] = [
       }
     ],
     tables: [],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "An Oxygen saturation step-up from 70% in the RA to 85% in the RV indicates:", options: ["ASD", "VSD", "PDA", "Tetralogy of Fallot"], correctIndex: 1, explanation: "Oxygenated blood from the LV crosses the VSD into the RV, raising the saturation at the ventricular level." },
+      { id: 2, question: "Which lesion is most associated with Rib Notching on CXR?", options: ["ASD", "VSD", "Coarctation of Aorta", "PDA"], correctIndex: 2, explanation: "In Coarctation, collateral flow through intercostal arteries erodes the underside of the ribs." },
+      { id: 3, question: "A continuous 'machinery' murmur is characteristic of:", options: ["VSD", "PDA", "Aortic Regurgitation", "Mitral Stenosis"], correctIndex: 1, explanation: "PDA connects high pressure Aorta to lower pressure PA, causing flow throughout systole and diastole." },
+      { id: 4, question: "The severity of cyanosis in Tetralogy of Fallot is determined by:", options: ["Size of VSD", "Degree of Pulmonic Stenosis", "Degree of Overriding Aorta", "RV Hypertrophy"], correctIndex: 1, explanation: "Severe PS forces more deoxygenated blood across the VSD into the Aorta (R->L shunt). If PS is mild, patient may be acyanotic ('Pink Tet')." },
+      { id: 5, question: "Fixed Splitting of S2 is caused by:", options: ["LBBB", "RBBB", "ASD", "Pulmonary Hypertension"], correctIndex: 2, explanation: "ASD causes volume overload of the RV. The large volume keeps the Pulmonic valve open longer, regardless of respiratory cycle." },
+      { id: 6, question: "Eisenmenger Syndrome refers to:", options: ["Reversal of shunt to R->L due to PHTN", "Closure of VSD", "Heart Failure in ASD", "Infective Endocarditis"], correctIndex: 0, explanation: "Chronic L->R shunt causes pulmonary vascular remodeling and hypertension. When PA pressure > Systemic, the shunt reverses, causing cyanosis." },
+      { id: 7, question: "Ostium Primum ASD is associated with:", options: ["Down Syndrome", "Turner Syndrome", "Marfan Syndrome", "Noonan Syndrome"], correctIndex: 0, explanation: "Endocardial cushion defects (Primum ASD, Inlet VSD, Cleft Mitral) are common in Trisomy 21." },
+      { id: 8, question: "Anomalous Pulmonary Venous Return is associated with which ASD?", options: ["Secundum", "Primum", "Sinus Venosus", "Coronary Sinus"], correctIndex: 2, explanation: "Sinus Venosus defects (high in septum) often involve drainage of the Right Pulmonary Veins into the SVC." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1249,7 +1299,14 @@ export const courseContent: ModuleContent[] = [
     scenes: [],
     tables: [],
     quiz: [
-      { id: 1, question: "Which physical sign indicates severe Mitral Stenosis?", options: ["Loud S1", "Long Diastolic Rumble", "Short S2-Opening Snap interval", "Soft S1"], correctIndex: 2, explanation: "A short S2-OS interval implies very high Left Atrial pressure, which forces the mitral valve to snap open immediately after the aortic valve closes." }
+      { id: 1, question: "Which physical sign indicates severe Mitral Stenosis?", options: ["Loud S1", "Long Diastolic Rumble", "Short S2-Opening Snap interval", "Soft S1"], correctIndex: 2, explanation: "A short S2-OS interval implies very high Left Atrial pressure, which forces the mitral valve to snap open immediately after the aortic valve closes." },
+      { id: 2, question: "The most common cause of Mitral Stenosis is:", options: ["Calcification", "Rheumatic Fever", "Endocarditis", "Congenital"], correctIndex: 1, explanation: "Rheumatic heart disease is the cause of nearly all cases of Mitral Stenosis." },
+      { id: 3, question: "Pulsus Parvus et Tardus is classic for:", options: ["Aortic Regurgitation", "Aortic Stenosis", "Mitral Regurgitation", "HOCM"], correctIndex: 1, explanation: "The fixed obstruction of AS delays the upstroke (tardus) and reduces the amplitude (parvus)." },
+      { id: 4, question: "Which is an indication for surgery in Chronic Severe MR?", options: ["LVEF < 60%", "LVEF < 30%", "Asymptomatic with normal EF", "Palpitations"], correctIndex: 0, explanation: "Because MR unloads the LV (ejects into low pressure LA), EF should be super-normal. An EF < 60% indicates incipient LV dysfunction." },
+      { id: 5, question: "A blowing, early diastolic decrescendo murmur is seen in:", options: ["Mitral Stenosis", "Aortic Stenosis", "Aortic Regurgitation", "Mitral Regurgitation"], correctIndex: 2, explanation: "AR causes backflow during diastole. The pressure gradient is highest early in diastole, creating a decrescendo murmur." },
+      { id: 6, question: "Carvallo's Sign refers to:", options: ["Increase in murmur intensity with inspiration", "Increase in murmur with Valsalva", "Decreased JVP with inspiration", "Head bobbing"], correctIndex: 0, explanation: "Right sided murmurs (TR, PS) increase with inspiration due to increased venous return. This distinguishes TR from MR." },
+      { id: 7, question: "The Austin Flint murmur is associated with:", options: ["Aortic Stenosis", "Mitral Stenosis", "Aortic Regurgitation", "Pulmonic Regurgitation"], correctIndex: 2, explanation: "Severe AR jet strikes the anterior mitral leaflet, preventing it from opening fully, causing a functional Mitral Stenosis rumble." },
+      { id: 8, question: "Gallavardin Phenomenon refers to:", options: ["AS murmur radiating to apex", "MR murmur radiating to back", "AR murmur heard on right", "VSD murmur with thrill"], correctIndex: 0, explanation: "The musical/high-frequency components of AS can radiate to the apex and mimic MR. However, AS will not have a wide pulse pressure." }
     ],
     vignettes: [],
     mnemonics: []
@@ -1311,7 +1368,16 @@ export const courseContent: ModuleContent[] = [
     visuals: [],
     scenes: [],
     tables: [],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Which maneuver increases the murmur of HOCM?", options: ["Squatting", "Handgrip", "Valsalva", "Leg Raise"], correctIndex: 2, explanation: "Valsalva reduces preload/LV size, bringing the septum closer to the mitral valve, worsening obstruction." },
+      { id: 2, question: "A 'speckled' pattern on Echocardiogram is characteristic of:", options: ["Sarcoidosis", "Amyloidosis", "Hemochromatosis", "Viral Myocarditis"], correctIndex: 1, explanation: "Amyloid protein infiltration creates a granular 'sparkling' texture." },
+      { id: 3, question: "Which drug is contraindicated in HOCM?", options: ["Metoprolol", "Verapamil", "Digoxin", "Disopyramide"], correctIndex: 2, explanation: "Digoxin (positive inotrope) increases contractility, which can worsen the dynamic outflow obstruction." },
+      { id: 4, question: "Low voltage ECG combined with thick ventricular walls on Echo suggests:", options: ["LVH", "Amyloidosis", "Pericardial Effusion", "Obesity"], correctIndex: 1, explanation: "Infiltrative cardiomyopathy thickens the wall with protein, not muscle, so electrical voltage is low." },
+      { id: 5, question: "The most common cause of Myocarditis is:", options: ["Bacterial", "Viral", "Fungal", "Autoimmune"], correctIndex: 1, explanation: "Viral infections (Coxsackie B, Parvovirus B19, HHV6) are the leading cause." },
+      { id: 6, question: "Alcoholic Cardiomyopathy is a type of:", options: ["Dilated CM", "Hypertrophic CM", "Restrictive CM", "Ischemic CM"], correctIndex: 0, explanation: "Alcohol is toxic to myocardium and causes dilation and systolic failure. Can reverse with abstinence." },
+      { id: 7, question: "Doxorubicin (Adriamycin) toxicity causes:", options: ["Dilated CM", "Restrictive CM", "Hypertrophic CM", "Valvular disease"], correctIndex: 0, explanation: "Anthracyclines cause irreversible myocardial damage leading to DCM." },
+      { id: 8, question: "Sudden Cardiac Death in a young athlete is most likely due to:", options: ["HOCM", "Dilated CM", "Mitral Prolapse", "Aortic Stenosis"], correctIndex: 0, explanation: "HOCM is the leading cause of SCD in young athletes due to ventricular arrhythmias." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1399,7 +1465,16 @@ export const courseContent: ModuleContent[] = [
         ]
       }
     ],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Pulsus Paradoxus is defined as:", options: [">10 mmHg drop in SBP with inspiration", ">10 mmHg rise in SBP with inspiration", "Alternating strong/weak beats", "Double systolic peak"], correctIndex: 0, explanation: "In tamponade, inspiration increases RV filling, which pushes the septum into the LV (interdependence), reducing LV filling and SBP." },
+      { id: 2, question: "The Square Root Sign (Dip and Plateau) is seen in:", options: ["Tamponade", "Constrictive Pericarditis", "Dilated Cardiomyopathy", "Aortic Stenosis"], correctIndex: 1, explanation: "Rapid early diastolic filling is abruptly halted by the rigid pericardium." },
+      { id: 3, question: "PR segment depression is specific for:", options: ["Acute MI", "Acute Pericarditis", "Tamponade", "Pulmonary Embolism"], correctIndex: 1, explanation: "Atrial inflammation causes PR depression (and often PR elevation in aVR)." },
+      { id: 4, question: "Kussmaul Sign is characteristic of:", options: ["Tamponade", "Constriction", "Acute Pericarditis", "MVP"], correctIndex: 1, explanation: "In Constriction, the RV cannot accommodate the inspiratory increase in venous return, so JVP rises paradoxically." },
+      { id: 5, question: "Initial treatment for idiopathic pericarditis includes:", options: ["Antibiotics", "NSAIDs + Colchicine", "Steroids", "Pericardiocentesis"], correctIndex: 1, explanation: "Colchicine reduces recurrence rates. Steroids are reserved for refractory or autoimmune cases." },
+      { id: 6, question: "Ewart's Sign (dullness at left scapular tip) is seen in:", options: ["Pneumonia", "Large Pericardial Effusion", "Aortic Dissection", "Pulmonary Embolism"], correctIndex: 1, explanation: "Large effusion compresses the left lung base." },
+      { id: 7, question: "Dressler's Syndrome occurs:", options: ["2-3 days post-MI", "2-3 weeks post-MI", "During the MI", "Years later"], correctIndex: 1, explanation: "It is an autoimmune pericarditis appearing weeks after myocardial injury." },
+      { id: 8, question: "Electrical Alternans is specific for:", options: ["HOCM", "Cardiac Tamponade", "Constrictive Pericarditis", "Ventricular Tachycardia"], correctIndex: 1, explanation: "The heart swings back and forth in the large fluid sac, changing the electrical axis beat-to-beat." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1462,7 +1537,14 @@ export const courseContent: ModuleContent[] = [
     scenes: [],
     tables: [],
     quiz: [
-      { id: 1, question: "35yo woman with BP 160/100. Labs show K+ 3.1. Most appropriate screening test?", options: ["Plasma Metanephrines", "Renal Artery Doppler", "Aldosterone/Renin Ratio", "24hr Urine Cortisol"], correctIndex: 2, explanation: "HTN + Hypokalemia is classic for Primary Hyperaldosteronism (Conn's Syndrome). Screen with ARR." }
+      { id: 1, question: "35yo woman with BP 160/100. Labs show K+ 3.1. Most appropriate screening test?", options: ["Plasma Metanephrines", "Renal Artery Doppler", "Aldosterone/Renin Ratio", "24hr Urine Cortisol"], correctIndex: 2, explanation: "HTN + Hypokalemia is classic for Primary Hyperaldosteronism (Conn's Syndrome). Screen with ARR." },
+      { id: 2, question: "Goal BP reduction in Hypertensive Emergency (non-dissection) is:", options: ["Normalize BP in 1 hour", "Lower MAP by 25% in 1st hour", "Lower SBP to <140 immediately", "Do not lower BP"], correctIndex: 1, explanation: "Rapid reduction can cause cerebral or coronary ischemia due to autoregulation shifts." },
+      { id: 3, question: "Which drug is contraindicated in bilateral renal artery stenosis?", options: ["Amlodipine", "HCTZ", "ACE Inhibitors", "Beta Blockers"], correctIndex: 2, explanation: "ACE inhibitors dilate the efferent arteriole, which is maintaining GFR in the setting of stenosis. Can cause acute renal failure." },
+      { id: 4, question: "Paroxysms of headache, sweating, and palpitations suggests:", options: ["Hyperthyroidism", "Pheochromocytoma", "Carcinoid", "Panic Attack"], correctIndex: 1, explanation: "The classic triad of Pheochromocytoma." },
+      { id: 5, question: "Which is NOT a component of Metabolic Syndrome?", options: ["High Triglycerides", "Low HDL", "High LDL", "Central Obesity"], correctIndex: 2, explanation: "High LDL is a risk factor but not part of the definition (TG, HDL, BP, Glucose, Waist)." },
+      { id: 6, question: "Masked Hypertension is defined as:", options: ["High at home, Low in clinic", "High in clinic, Low at home", "High only at night", "High only with stress"], correctIndex: 0, explanation: "Masked HTN carries high cardiovascular risk but is missed by clinic measurements." },
+      { id: 7, question: "First line drug for Hypertension in African Americans:", options: ["ACE Inhibitor", "Beta Blocker", "Thiazide or CCB", "Loop Diuretic"], correctIndex: 2, explanation: "Thiazides and CCBs are more effective in this population unless CKD is present." },
+      { id: 8, question: "Labetalol is a:", options: ["Selective Beta-1 blocker", "Non-selective Beta blocker + Alpha blocker", "Alpha blocker only", "Calcium channel blocker"], correctIndex: 1, explanation: "Combined Alpha/Beta blockade makes it potent for hypertensive emergencies." }
     ],
     vignettes: [],
     mnemonics: []
@@ -1524,7 +1606,16 @@ export const courseContent: ModuleContent[] = [
     visuals: [],
     scenes: [],
     tables: [],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Door-to-Balloon time goal for Primary PCI is:", options: ["< 30 min", "< 60 min", "< 90 min", "< 120 min"], correctIndex: 2, explanation: "Guidelines recommend < 90 minutes for PCI centers." },
+      { id: 2, question: "Which medication should be avoided in RV Infarction?", options: ["IV Fluids", "Aspirin", "Nitroglycerin", "Heparin"], correctIndex: 2, explanation: "RV infarcts are preload dependent. Nitrates dilate veins, dropping preload and causing severe hypotension." },
+      { id: 3, question: "New loud holosystolic murmur and shock 4 days post-MI suggests:", options: ["VSD or Papillary Rupture", "Free Wall Rupture", "Pericarditis", "Recurrent MI"], correctIndex: 0, explanation: "Both VSD and MR cause systolic murmurs and shock. Free wall rupture causes tamponade (no murmur)." },
+      { id: 4, question: "ST Elevation in leads II, III, aVF indicates infarction of:", options: ["Anterior Wall", "Lateral Wall", "Inferior Wall", "Posterior Wall"], correctIndex: 2, explanation: "Inferior wall, usually supplied by the RCA." },
+      { id: 5, question: "Absolute contraindication to fibrinolysis:", options: ["Age > 75", "Prior Ischemic Stroke (3 months ago)", "Active Peptic Ulcer", "Hypertension 160/90"], correctIndex: 1, explanation: "Prior stroke within 3 months is an absolute contraindication due to bleed risk." },
+      { id: 6, question: "Posterior MI is suggested by:", options: ["ST Elevation V1-V2", "ST Depression and Tall R waves in V1-V2", "ST Elevation I and aVL", "Deep Q waves in II, III, aVF"], correctIndex: 1, explanation: "Anterior leads V1/V2 see the posterior wall as a 'mirror'. ST depression corresponds to posterior ST elevation." },
+      { id: 7, question: "Ventricular Free Wall Rupture typically presents as:", options: ["New murmur and pulmonary edema", "Sudden PEA Arrest and Tamponade", "Atrial Fibrillation", "High degree AV block"], correctIndex: 1, explanation: "Blood rushes into pericardial space causing acute tamponade and electromechanical dissociation (PEA)." },
+      { id: 8, question: "Wellens' Sign on ECG indicates:", options: ["Critical proximal LAD stenosis", "RCA occlusion", "Pericarditis", "Digoxin toxicity"], correctIndex: 0, explanation: "Biphasic or Deeply inverted T waves in V2-V3 during a pain-free interval warn of impending massive Anterior MI." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1575,7 +1666,16 @@ export const courseContent: ModuleContent[] = [
     visuals: [],
     scenes: [],
     tables: [],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Which therapy is contraindicated in NSTEMI?", options: ["Heparin", "Aspirin", "Fibrinolysis (tPA)", "Beta Blockers"], correctIndex: 2, explanation: "Fibrinolysis is harmful in NSTEMI (increases mortality/bleeding without benefit). It is only for STEMI." },
+      { id: 2, question: "First line anti-anginal for Chronic Stable Angina:", options: ["Nitrates", "Beta Blockers", "Ranolazine", "CCB"], correctIndex: 1, explanation: "Beta blockers reduce mortality and symptoms." },
+      { id: 3, question: "Indication for CABG over PCI:", options: ["1 vessel disease", "Left Main Disease", "Refractory Angina", "Acute STEMI"], correctIndex: 1, explanation: "Left Main or 3-vessel disease (esp with Diabetes) has better survival with CABG." },
+      { id: 4, question: "Treatment of choice for Prinzmetal's Angina:", options: ["Beta Blockers", "Calcium Channel Blockers", "Aspirin", "Warfarin"], correctIndex: 1, explanation: "CCBs prevent vasospasm. Beta blockers can worsen it." },
+      { id: 5, question: "TIMI Risk Score predicts:", options: ["Risk of Bleeding", "Mortality/Ischemic events in 14 days", "Need for CABG", "Risk of Stroke"], correctIndex: 1, explanation: "Used to triage UA/NSTEMI patients to invasive vs conservative strategy." },
+      { id: 6, question: "HEART Score components include:", options: ["History, ECG, Age, Risk factors, Troponin", "Hypertension, Edema, Age, Rate, Troponin", "History, Echo, Age, Race, Troponin", "None of the above"], correctIndex: 0, explanation: "Used to risk stratify chest pain in the ER." },
+      { id: 7, question: "Side effect of Ranolazine:", options: ["Bradycardia", "Hypotension", "QT Prolongation", "Bronchospasm"], correctIndex: 2, explanation: "It inhibits the late sodium current but can prolong QT." },
+      { id: 8, question: "Duration of Dual Antiplatelet Therapy (DAPT) after Drug Eluting Stent (DES):", options: ["1 month", "6-12 months", "Indefinite", "Not needed"], correctIndex: 1, explanation: "Typically 12 months for ACS, 6 months for Stable CAD to prevent stent thrombosis." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1643,7 +1743,16 @@ export const courseContent: ModuleContent[] = [
     visuals: [],
     scenes: [],
     tables: [],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Treatment for unstable VT is:", options: ["Adenosine", "Amiodarone", "Synchronized Cardioversion", "Defibrillation"], correctIndex: 2, explanation: "Unstable tachycardia with a pulse requires synchronized cardioversion. Defibrillation is for pulseless arrest." },
+      { id: 2, question: "Which AV block requires a pacemaker?", options: ["First Degree", "Mobitz I", "Mobitz II", "Sinus Bradycardia"], correctIndex: 2, explanation: "Mobitz II indicates disease below the AV node (His-Purkinje) and frequently progresses to complete heart block." },
+      { id: 3, question: "Drug of choice for Torsades de Pointes:", options: ["Amiodarone", "Magnesium Sulfate", "Adenosine", "Digoxin"], correctIndex: 1, explanation: "Magnesium stabilizes the membrane." },
+      { id: 4, question: "In WPW with Atrial Fibrillation, which drug is CONTRAINDICATED?", options: ["Procainamide", "Ibutilide", "Diltiazem", "Amiodarone"], correctIndex: 2, explanation: "AV nodal blockers (ABCD: Adenosine, Beta blockers, CCB, Digoxin) force conduction down the accessory pathway, which can lead to VF." },
+      { id: 5, question: "CHA2DS2-VASc score of 0 indicates:", options: ["High risk, Start Warfarin", "No antithrombotic therapy needed", "Start Aspirin", "Start Clopidogrel"], correctIndex: 1, explanation: "Low risk. No anticoagulation needed." },
+      { id: 6, question: "Multifocal Atrial Tachycardia (MAT) is most often associated with:", options: ["COPD", "Ischemic Heart Disease", "Rheumatic Heart Disease", "Alcohol"], correctIndex: 0, explanation: "MAT (>3 P wave morphologies) is triggered by hypoxia and lung disease." },
+      { id: 7, question: "Ashman Phenomenon refers to:", options: ["Wide QRS aberrancy in AF", "Short PR in WPW", "ST elevation in Brugada", "QT prolongation"], correctIndex: 0, explanation: "A long R-R interval followed by a short R-R interval causes the second beat to conduct with aberrancy (usually RBBB morphology) because the bundle was still refractory." },
+      { id: 8, question: "Mechanism of action of Adenosine:", options: ["Sodium channel blocker", "Potassium channel blocker", "Transient AV node block", "Beta blocker"], correctIndex: 2, explanation: "Causes transient complete heart block to terminate re-entrant SVT." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1707,7 +1816,16 @@ export const courseContent: ModuleContent[] = [
       }
     ],
     tables: [],
-    quiz: [],
+    quiz: [
+      { id: 1, question: "Which medication reduces mortality in HFrEF?", options: ["Furosemide", "Digoxin", "Spironolactone", "Amlodipine"], correctIndex: 2, explanation: "Aldosterone antagonists reduce mortality. Diuretics and Digoxin improve symptoms/hospitalizations but not survival." },
+      { id: 2, question: "Patient with HF, BP 80/50, Cool extremities, Crackles. Profile is:", options: ["Warm and Dry", "Warm and Wet", "Cold and Dry", "Cold and Wet"], correctIndex: 3, explanation: "Cold (Hypoperfusion) and Wet (Congestion). Cardiogenic Shock." },
+      { id: 3, question: "First line therapy for 'Warm and Wet' decompensation:", options: ["Inotropes", "IV Diuretics", "Beta Blockers", "Fluids"], correctIndex: 1, explanation: "Volume overload requires diuresis." },
+      { id: 4, question: "Cor Pulmonale is:", options: ["LV failure causing RV failure", "RV failure due to lung disease", "Congenital Heart Disease", "Primary Valvular Disease"], correctIndex: 1, explanation: "Right heart failure typically caused by Pulmonary Hypertension from lung pathology." },
+      { id: 5, question: "Which beta blocker is NOT approved for HFrEF?", options: ["Carvedilol", "Metoprolol Succinate", "Bisoprolol", "Atenolol"], correctIndex: 3, explanation: "Only Carvedilol, Bisoprolol, and Metoprolol Succinate (XL) have evidence for mortality benefit." },
+      { id: 6, question: "Sacubitril acts by inhibiting:", options: ["ACE", "Neprilysin", "Aldosterone", "Renin"], correctIndex: 1, explanation: "Neprilysin inhibition prevents the breakdown of Natriuretic Peptides (BNP), promoting diuresis and vasodilation." },
+      { id: 7, question: "Cardiac Resynchronization Therapy (CRT) is indicated for:", options: ["EF < 35% and QRS > 150ms (LBBB)", "EF < 35% and Normal QRS", "AF with RVR", "Diastolic Failure"], correctIndex: 0, explanation: "Biventricular pacing resynchronizes septal and lateral wall contraction in LBBB." },
+      { id: 8, question: "Ivabradine is used when:", options: ["HR > 70 despite max Beta Blocker", "Atrial Fibrillation", "Acute Decompensation", "BP is low"], correctIndex: 0, explanation: "It inhibits the If current in the sinus node to slow HR without affecting BP." }
+    ],
     vignettes: [],
     mnemonics: []
   },
@@ -1770,7 +1888,14 @@ export const courseContent: ModuleContent[] = [
     scenes: [],
     tables: [],
     quiz: [
-      { id: 1, question: "60yo male with sudden tearing back pain. BP 190/110. CT shows dissection distal to left subclavian. Initial step?", options: ["Emergent Surgery", "IV Hydralazine", "IV Beta Blockers", "Thrombolysis"], correctIndex: 2, explanation: "Type B Dissection (Descending) is treated medically. First line is Beta Blockers to reduce shear stress (dP/dt). Hydralazine increases shear stress (reflex tachy) and is contraindicated." }
+      { id: 1, question: "60yo male with sudden tearing back pain. BP 190/110. CT shows dissection distal to left subclavian. Initial step?", options: ["Emergent Surgery", "IV Hydralazine", "IV Beta Blockers", "Thrombolysis"], correctIndex: 2, explanation: "Type B Dissection (Descending) is treated medically. First line is Beta Blockers to reduce shear stress (dP/dt). Hydralazine increases shear stress (reflex tachy) and is contraindicated." },
+      { id: 2, question: "Diagnostic test for AAA screening:", options: ["CT Scan", "Abdominal Ultrasound", "MRI", "Angiography"], correctIndex: 1, explanation: "Ultrasound is non-invasive, cheap, and highly sensitive for screening." },
+      { id: 3, question: "ABI < 0.4 indicates:", options: ["Normal", "Mild PAD", "Severe/Critical Ischemia", "Calcified vessels"], correctIndex: 2, explanation: "Severe obstruction. Risk of rest pain and ulcers." },
+      { id: 4, question: "Which of the following is NOT one of the 6 P's of Acute Limb Ischemia?", options: ["Pain", "Pallor", "Pulselessness", "Purpura"], correctIndex: 3, explanation: "The P's are Pain, Pallor, Pulselessness, Paresthesia, Paralysis, Poikilothermia." },
+      { id: 5, question: "Group 2 Pulmonary Hypertension is caused by:", options: ["Lung Disease", "Left Heart Disease", "Chronic PE", "Idiopathic"], correctIndex: 1, explanation: "Group 2 is PVH due to Left Heart Disease (Systolic/Diastolic failure, Valvular disease)." },
+      { id: 6, question: "Leriche Syndrome triad includes:", options: ["Claudication, Impotence, Absent femoral pulses", "Chest pain, Dyspnea, Syncope", "HTN, Bradycardia, Irregular breathing", "Fever, Murmur, Splinter hemorrhages"], correctIndex: 0, explanation: "Caused by occlusion of the distal abdominal aorta/iliac arteries." },
+      { id: 7, question: "Cystic Medial Necrosis is the pathology underlying:", options: ["Atherosclerosis", "Marfan Syndrome / Aortic Dissection", "Giant Cell Arteritis", "Fibromuscular Dysplasia"], correctIndex: 1, explanation: "Degeneration of the aortic media predisposes to aneurysm and dissection." },
+      { id: 8, question: "Subclavian Steal Syndrome presents with:", options: ["Syncope with arm exercise", "Leg pain with walking", "Abdominal pain after eating", "Flash pulmonary edema"], correctIndex: 0, explanation: "Stenosis of subclavian artery proximal to vertebral artery origin causes retrograde flow from vertebral to supply the arm, stealing blood from the brain." }
     ],
     vignettes: [],
     mnemonics: []
